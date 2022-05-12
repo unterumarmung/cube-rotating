@@ -1,6 +1,6 @@
 import numpy
 from math import *
-from quat import *
+from quat import Quaternion
 
 import pygame
 from pygame.locals import *
@@ -128,7 +128,7 @@ def main():
 
     inc_x = 0
     inc_y = 0
-    accum = (1, 0, 0, 0)
+    accum = Quaternion.from_value((1, 0, 0, 0))
 
     while True:
         for event in pygame.event.get():
@@ -151,7 +151,7 @@ def main():
 
                 # Reset to default view
                 if event.key == pygame.K_SPACE:
-                    accum = (1, 0, 0, 0)
+                    accum = Quaternion.from_value((1, 0, 0, 0))
 
             if event.type == pygame.KEYUP:
                 # Stoping rotation
@@ -160,13 +160,13 @@ def main():
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     inc_y = 0.0
 
-        rot_x = normalize(axisangle_to_q((1.0, 0.0, 0.0), inc_x))
-        rot_y = normalize(axisangle_to_q((0.0, 1.0, 0.0), inc_y))
-        accum = q_mult(accum, rot_x)
-        accum = q_mult(accum, rot_y)
+        rot_x = Quaternion.from_axisangle(inc_x, (1.0, 0.0, 0.0))
+        rot_y = Quaternion.from_axisangle(inc_y, (0.0, 1.0, 0.0))
+        accum = accum * rot_x
+        accum = accum * rot_y
 
         glMatrixMode(GL_MODELVIEW)
-        glLoadMatrixf(q_to_mat4(accum))
+        glLoadMatrixf(accum.get_mat4())
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         Cube()
