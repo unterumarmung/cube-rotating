@@ -90,7 +90,7 @@ cube_colors = (
 )
 
 
-def Axis():
+def draw_axis():
     with OpenGLContext(GL_LINES) as context:
         for color, axis in zip(axis_colors, axes):
             glColor3fv(color)
@@ -98,7 +98,7 @@ def Axis():
                 glVertex3fv(axis_verts[point])
 
 
-def Cube():
+def draw_cube():
     with OpenGLContext(GL_QUADS) as context:
         for color, surface in zip(cube_colors, cube_surfaces):
             glColor3fv(color)
@@ -112,19 +112,45 @@ def Cube():
                 glVertex3fv(cube_verts[vertex])
 
 
-def main():
+def init_pygame():
+    # Try to center the window
+    import os
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
+    # Init the window
     pygame.init()
-    display = (1800, 1718)
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    screen = pygame.display.set_mode()
+    screen_info = pygame.display.Info()
+    width, height = screen_info.current_w, screen_info.current_h
+    display = (width/2, height/2)
+    pygame.display.set_mode((width/2, height/2), DOUBLEBUF | OPENGL)
 
+    return display
+
+
+def init_opengl(window_size):
     # Using depth test to make sure closer colors are shown over further ones
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LESS)
-
     # Default view
     glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, (display[0]/display[1]), 0.5, 40)
+    gluPerspective(45, (window_size[0]/window_size[1]), 0.5, 40)
     glTranslatef(0.0, 0.0, -17.5)
+
+
+def update_opengl(mat4):
+    glMatrixMode(GL_MODELVIEW)
+    glLoadMatrixf(accum.get_mat4())
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+
+def update_pygame():
+    pygame.display.flip()
+    pygame.time.wait(10)
+
+
+def main():
+    window_size = init_pygame()
+    init_opengl(window_size)
 
     inc_x = 0
     inc_y = 0
@@ -165,14 +191,12 @@ def main():
         accum = accum * rot_x
         accum = accum * rot_y
 
-        glMatrixMode(GL_MODELVIEW)
-        glLoadMatrixf(accum.get_mat4())
+        update_opengl(accum.get_mat4())
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        Cube()
-        Axis()
-        pygame.display.flip()
-        pygame.time.wait(10)
+        draw_cube()
+        draw_axis()
+
+        update_pygame()
 
 
 main()
