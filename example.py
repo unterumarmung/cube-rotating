@@ -8,6 +8,7 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+from utils import OpenGLContext
 
 axis_verts = (
     (-7.5, 0.0, 0.0),
@@ -90,28 +91,25 @@ cube_colors = (
 
 
 def Axis():
-    glBegin(GL_LINES)
-    for color, axis in zip(axis_colors, axes):
-        glColor3fv(color)
-        for point in axis:
-            glVertex3fv(axis_verts[point])
-    glEnd()
+    with OpenGLContext(GL_LINES) as context:
+        for color, axis in zip(axis_colors, axes):
+            glColor3fv(color)
+            for point in axis:
+                glVertex3fv(axis_verts[point])
 
 
 def Cube():
-    glBegin(GL_QUADS)
-    for color, surface in zip(cube_colors, cube_surfaces):
-        glColor3fv(color)
-        for vertex in surface:
-            glVertex3fv(cube_verts[vertex])
-    glEnd()
+    with OpenGLContext(GL_QUADS) as context:
+        for color, surface in zip(cube_colors, cube_surfaces):
+            glColor3fv(color)
+            for vertex in surface:
+                glVertex3fv(cube_verts[vertex])
 
-    glBegin(GL_LINES)
-    glColor3fv((0.0, 0.0, 0.0))
-    for edge in cube_edges:
-        for vertex in edge:
-            glVertex3fv(cube_verts[vertex])
-    glEnd()
+    with OpenGLContext(GL_LINES) as context:
+        glColor3fv((0.0, 0.0, 0.0))
+        for edge in cube_edges:
+            for vertex in edge:
+                glVertex3fv(cube_verts[vertex])
 
 
 def main():
