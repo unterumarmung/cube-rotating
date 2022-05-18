@@ -22,6 +22,11 @@ class Quaternion:
         return new_quaternion
 
     @staticmethod
+    def from_string(string: str):
+        value = [float(s[2:]) for s in string.split(';')]
+        return Quaternion.from_value(value)
+
+    @staticmethod
     def from_value(value):
         new_quaternion = Quaternion()
         new_quaternion._val = value
